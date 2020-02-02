@@ -102,10 +102,6 @@ impl SavedError {
 }
 
 impl error::Error for SharedError {
-    fn description(&self) -> &str {
-        self.error.description()
-    }
-
     fn cause(&self) -> Option<&dyn error::Error> {
         Some(&*self.error)
     }
