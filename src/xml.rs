@@ -249,34 +249,30 @@ impl<'a> Item<'a> {
         w.write_all(b">\n")?;
 
         write_indent(&mut w, indent + 1)?;
-        write!(&mut w, "<title>{}</title>\n", encode_entities(&self.title))?;
+        writeln!(&mut w, "<title>{}</title>", encode_entities(&self.title))?;
 
         if let Some(ref subtitle) = self.subtitle {
             write_indent(&mut w, indent + 1)?;
-            write!(
-                &mut w,
-                "<subtitle>{}</subtitle>\n",
-                encode_entities(subtitle)
-            )?;
+            writeln!(&mut w, "<subtitle>{}</subtitle>", encode_entities(subtitle))?;
         }
 
         if let Some(ref icon) = self.icon {
             write_indent(&mut w, indent + 1)?;
             match *icon {
                 Icon::Path(ref s) => {
-                    write!(&mut w, "<icon>{}</icon>\n", encode_entities(s))?;
+                    writeln!(&mut w, "<icon>{}</icon>", encode_entities(s))?;
                 }
                 Icon::File(ref s) => {
-                    write!(
+                    writeln!(
                         &mut w,
-                        "<icon type=\"fileicon\">{}</icon>\n",
+                        "<icon type=\"fileicon\">{}</icon>",
                         encode_entities(s)
                     )?;
                 }
                 Icon::FileType(ref s) => {
-                    write!(
+                    writeln!(
                         &mut w,
-                        "<icon type=\"filetype\">{}</icon>\n",
+                        "<icon type=\"filetype\">{}</icon>",
                         encode_entities(s)
                     )?;
                 }
@@ -311,26 +307,26 @@ impl<'a> Item<'a> {
 
         if let Some(ref text) = self.text_copy {
             write_indent(&mut w, indent + 1)?;
-            write!(
+            writeln!(
                 &mut w,
-                "<text type=\"copy\">{}</text>\n",
+                "<text type=\"copy\">{}</text>",
                 encode_entities(text)
             )?;
         }
         if let Some(ref text) = self.text_large_type {
             write_indent(&mut w, indent + 1)?;
-            write!(
+            writeln!(
                 &mut w,
-                "<text type=\"largetype\">{}</text>\n",
+                "<text type=\"largetype\">{}</text>",
                 encode_entities(text)
             )?;
         }
 
         if let Some(ref url) = self.quicklook_url {
             write_indent(&mut w, indent + 1)?;
-            write!(
+            writeln!(
                 &mut w,
-                "<quicklookurl>{}</quicklookurl>\n",
+                "<quicklookurl>{}</quicklookurl>",
                 encode_entities(url)
             )?;
         }
