@@ -123,7 +123,7 @@ impl<'a> Builder<'a> {
         let mut root = json::Map::new();
         root.insert(
             "items".to_string(),
-            Value::Array(self.items.into_iter().map(|x| x.to_json()).collect()),
+            Value::Array(self.items.iter().map(|x| x.to_json()).collect()),
         );
         let mut iter = self.variables.into_iter();
         if let Some(first) = iter.next() {
