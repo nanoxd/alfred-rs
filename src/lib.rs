@@ -115,7 +115,7 @@
 //! ```
 
 #![warn(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/alfred/4.0.2")]
+#![doc(html_root_url = "https://docs.rs/alfred/5.0.0")]
 
 pub mod env;
 pub mod json;
