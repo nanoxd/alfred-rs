@@ -353,7 +353,7 @@ fn encode_entities(s: &str) -> Cow<str> {
             '>' => "&gt;",
             '"' => "&quot;",
             '&' => "&amp;",
-            '\0'...'\x08' | '\x0B'...'\x0C' | '\x0E'...'\x1F' | '\u{FFFE}' | '\u{FFFF}' => {
+            '\0'..='\x08' | '\x0B'..='\x0C' | '\x0E'..='\x1F' | '\u{FFFE}' | '\u{FFFF}' => {
                 // these are all invalid characters in XML
                 "\u{FFFD}"
             }
