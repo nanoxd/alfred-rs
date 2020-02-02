@@ -710,7 +710,7 @@ impl<'a> ItemBuilder<'a> {
             subtitle: subtitle.map(Into::into),
             arg: arg.map(Into::into),
             valid: Some(valid),
-            icon: icon,
+            icon,
             variables: HashMap::new(),
             _priv: (),
         };
