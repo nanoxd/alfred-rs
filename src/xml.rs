@@ -106,7 +106,7 @@ impl error::Error for SharedError {
         self.error.description()
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         Some(&*self.error)
     }
 }
@@ -217,8 +217,8 @@ impl<'a> Item<'a> {
     ///
     /// `XMLWriter` should be used instead if at all possible, in order to
     /// write the XML header/footer and maintain proper error discipline.
-    pub fn write_xml(&self, w: &mut Write, indent: u32) -> io::Result<()> {
-        fn write_indent(w: &mut Write, indent: u32) -> io::Result<()> {
+    pub fn write_xml(&self, w: &mut dyn Write, indent: u32) -> io::Result<()> {
+        fn write_indent(w: &mut dyn Write, indent: u32) -> io::Result<()> {
             for _ in 0..indent {
                 try!(w.write_all(b"    "));
             }
