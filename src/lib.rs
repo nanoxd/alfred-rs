@@ -84,7 +84,7 @@
 //! # use std::io::{self, Write};
 //! #
 //! # fn write_items() -> io::Result<()> {
-//! let mut xmlw = try!(alfred::XMLWriter::new(io::stdout()));
+//! let mut xmlw = alfred::XMLWriter::new(io::stdout())?;
 //!
 //! let item1 = alfred::Item::new("Item 1");
 //! let item2 = alfred::ItemBuilder::new("Item 2")
@@ -96,11 +96,11 @@
 //!                                 .icon_filetype("public.folder")
 //!                                 .into_item();
 //!
-//! try!(xmlw.write_item(&item1));
-//! try!(xmlw.write_item(&item2));
-//! try!(xmlw.write_item(&item3));
+//! xmlw.write_item(&item1)?;
+//! xmlw.write_item(&item2)?;
+//! xmlw.write_item(&item3)?;
 //!
-//! let mut stdout = try!(xmlw.close());
+//! let mut stdout = xmlw.close()?;
 //! stdout.flush()
 //! # }
 //! #
@@ -116,9 +116,6 @@
 
 #![warn(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/alfred/4.0.2")]
-
-#[macro_use]
-extern crate serde_json;
 
 pub mod env;
 pub mod json;

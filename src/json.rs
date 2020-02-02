@@ -68,12 +68,12 @@
 //! # }
 //! ```
 
-use serde_json as json;
+use crate::{Icon, Item, ItemType, Modifier, ModifierData};
+use serde_json::json;
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::io;
 use std::io::prelude::*;
-use {Icon, Item, ItemType, Modifier, ModifierData};
 
 /// Writes a complete JSON document representing the `Item`s to the `Write`.
 ///
@@ -120,14 +120,14 @@ impl<'a> Builder<'a> {
 
     /// Serializes items into their JSON representation.
     pub fn into_json(self) -> Value {
-        let mut root = json::Map::new();
+        let mut root = serde_json::Map::new();
         root.insert(
             "items".to_string(),
             Value::Array(self.items.iter().map(|x| x.to_json()).collect()),
         );
         let mut iter = self.variables.into_iter();
         if let Some(first) = iter.next() {
-            let mut vars = json::Map::new();
+            let mut vars = serde_json::Map::new();
             vars.insert(first.0.into(), Value::String(first.1.into()));
             for elt in iter {
                 vars.insert(elt.0.into(), Value::String(elt.1.into()));
@@ -174,7 +174,7 @@ impl<'a> Builder<'a> {
 impl<'a> Item<'a> {
     /// Serializes the `Item` into its JSON representation.
     pub fn to_json(&self) -> Value {
-        let mut d = json::Map::new();
+        let mut d = serde_json::Map::new();
         d.insert("title".to_string(), json!(self.title));
         if let Some(ref subtitle) = self.subtitle {
             d.insert("subtitle".to_string(), json!(subtitle));
@@ -204,7 +204,7 @@ impl<'a> Item<'a> {
             d.insert("autocomplete".to_string(), json!(autocomplete));
         }
         if self.text_copy.is_some() || self.text_large_type.is_some() {
-            let mut text = json::Map::new();
+            let mut text = serde_json::Map::new();
             if let Some(ref text_copy) = self.text_copy {
                 text.insert("copy".to_string(), json!(text_copy));
             }
@@ -217,7 +217,7 @@ impl<'a> Item<'a> {
             d.insert("quicklookurl".to_string(), json!(url));
         }
         if !self.modifiers.is_empty() {
-            let mut mods = json::Map::with_capacity(self.modifiers.len());
+            let mut mods = serde_json::Map::with_capacity(self.modifiers.len());
             for (modifier, data) in &self.modifiers {
                 let key = match *modifier {
                     Modifier::Command => "cmd",
@@ -232,7 +232,7 @@ impl<'a> Item<'a> {
             d.insert("mods".to_string(), Value::Object(mods));
         }
         if !self.variables.is_empty() {
-            let mut vars = json::Map::with_capacity(self.variables.len());
+            let mut vars = serde_json::Map::with_capacity(self.variables.len());
             for (key, value) in &self.variables {
                 vars.insert(key.clone().into_owned(), json!(value.clone().into_owned()));
             }
@@ -256,7 +256,7 @@ impl<'a> Icon<'a> {
 impl<'a> ModifierData<'a> {
     /// Serializes the `ModifierData` into its JSON representation.
     pub fn to_json(&self) -> Value {
-        let mut mod_ = json::Map::new();
+        let mut mod_ = serde_json::Map::new();
         if let Some(ref subtitle) = self.subtitle {
             mod_.insert("subtitle".to_string(), json!(subtitle));
         }
@@ -270,7 +270,7 @@ impl<'a> ModifierData<'a> {
             mod_.insert("icon".to_string(), icon.to_json());
         }
         if !self.variables.is_empty() {
-            let mut vars = json::Map::with_capacity(self.variables.len());
+            let mut vars = serde_json::Map::with_capacity(self.variables.len());
             for (key, value) in &self.variables {
                 vars.insert(key.clone().into_owned(), json!(value.clone().into_owned()));
             }
@@ -284,7 +284,7 @@ impl<'a> ModifierData<'a> {
 fn test_to_json() {
     let item = Item::new("Item 1");
     assert_eq!(item.to_json(), json!({"title": "Item 1"}));
-    let item = ::ItemBuilder::new("Item 2")
+    let item = super::ItemBuilder::new("Item 2")
         .subtitle("Subtitle")
         .into_item();
     assert_eq!(
@@ -294,7 +294,7 @@ fn test_to_json() {
             "subtitle": "Subtitle"
         })
     );
-    let item = ::ItemBuilder::new("Item 3")
+    let item = super::ItemBuilder::new("Item 3")
         .arg("Argument")
         .subtitle("Subtitle")
         .icon_filetype("public.folder")
@@ -308,7 +308,7 @@ fn test_to_json() {
             "icon": { "type": "filetype", "path": "public.folder" }
         })
     );
-    let item = ::ItemBuilder::new("Item 4")
+    let item = super::ItemBuilder::new("Item 4")
         .arg("Argument")
         .subtitle("Subtitle")
         .arg_mod(Modifier::Option, "Alt Argument")
@@ -342,7 +342,7 @@ fn test_to_json() {
             }
         })
     );
-    let item = ::ItemBuilder::new("Item 5")
+    let item = super::ItemBuilder::new("Item 5")
         .arg("Argument")
         .variable("fruit", "banana")
         .variable("vegetable", "carrot")
@@ -358,7 +358,7 @@ fn test_to_json() {
             }
         })
     );
-    let item = ::ItemBuilder::new("Item 6")
+    let item = super::ItemBuilder::new("Item 6")
         .subtitle("Subtitle")
         .variable("fruit", "banana")
         .variable_mod(Modifier::Option, "vegetable", "carrot")
@@ -386,10 +386,10 @@ fn test_to_json() {
 fn test_builder() {
     let json = Builder::with_items(&[
         Item::new("Item 1"),
-        ::ItemBuilder::new("Item 2")
+        super::ItemBuilder::new("Item 2")
             .subtitle("Subtitle")
             .into_item(),
-        ::ItemBuilder::new("Item 3")
+        super::ItemBuilder::new("Item 3")
             .arg("Argument")
             .subtitle("Subtitle")
             .icon_filetype("public.folder")

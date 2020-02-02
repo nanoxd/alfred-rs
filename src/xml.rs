@@ -11,7 +11,7 @@
 //! # use std::io::{self, Write};
 //! #
 //! # fn write_items() -> io::Result<()> {
-//! let mut xmlw = try!(alfred::XMLWriter::new(io::stdout()));
+//! let mut xmlw = alfred::XMLWriter::new(io::stdout())?;
 //!
 //! let item1 = alfred::Item::new("Item 1");
 //! let item2 = alfred::ItemBuilder::new("Item 2")
@@ -23,11 +23,11 @@
 //!                                 .icon_filetype("public.folder")
 //!                                 .into_item();
 //!
-//! try!(xmlw.write_item(&item1));
-//! try!(xmlw.write_item(&item2));
-//! try!(xmlw.write_item(&item3));
+//! xmlw.write_item(&item1)?;
+//! xmlw.write_item(&item2)?;
+//! xmlw.write_item(&item3)?;
 //!
-//! let mut stdout = try!(xmlw.close());
+//! let mut stdout = xmlw.close()?;
 //! stdout.flush()
 //! # }
 //! #
@@ -49,7 +49,7 @@ use std::io::prelude::*;
 use std::mem;
 use std::sync;
 
-use {Icon, Item, ItemType, Modifier};
+use crate::{Icon, Item, ItemType, Modifier};
 
 /// Helper struct used to manage the XML serialization of `Item`s.
 ///
