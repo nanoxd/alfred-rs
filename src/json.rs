@@ -68,12 +68,12 @@
 //! # }
 //! ```
 
-use ::{Item, ItemType, Modifier, Icon, ModifierData};
 use serde_json as json;
 use serde_json::value::Value;
 use std::collections::HashMap;
 use std::io;
 use std::io::prelude::*;
+use {Icon, Item, ItemType, Modifier, ModifierData};
 
 /// Writes a complete JSON document representing the `Item`s to the `Write`.
 ///
@@ -85,23 +85,29 @@ pub fn write_items<W: Write>(w: W, items: &[Item]) -> io::Result<()> {
 /// A helper type for writing out items with top-level variables.
 ///
 /// Note: If you don't need top-level variables the `write_items()` function is easier to use.
-#[derive(Clone,Debug,Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Builder<'a> {
     /// The items that will be written out.
     pub items: &'a [Item<'a>],
     /// The variables that will be written out.
-    pub variables: HashMap<&'a str, &'a str>
+    pub variables: HashMap<&'a str, &'a str>,
 }
 
 impl<'a> Builder<'a> {
     /// Returns a new `Builder` with no items.
     pub fn new() -> Builder<'a> {
-        Builder { items: &[], variables: HashMap::new() }
+        Builder {
+            items: &[],
+            variables: HashMap::new(),
+        }
     }
 
     /// Returns a new `Builder` with the given items.
     pub fn with_items(items: &'a [Item]) -> Builder<'a> {
-        Builder { items, variables: HashMap::new() }
+        Builder {
+            items,
+            variables: HashMap::new(),
+        }
     }
 
     /// Writes a complete JSON document representing the items and variables to the `Write`.
@@ -115,9 +121,10 @@ impl<'a> Builder<'a> {
     /// Serializes items into their JSON representation.
     pub fn into_json(self) -> Value {
         let mut root = json::Map::new();
-        root.insert("items".to_string(), Value::Array(self.items.into_iter()
-                                                                .map(|x| x.to_json())
-                                                                .collect()));
+        root.insert(
+            "items".to_string(),
+            Value::Array(self.items.into_iter().map(|x| x.to_json()).collect()),
+        );
         let mut iter = self.variables.into_iter();
         if let Some(first) = iter.next() {
             let mut vars = json::Map::new();
@@ -217,8 +224,9 @@ impl<'a> Item<'a> {
                     Modifier::Option => "alt",
                     Modifier::Control => "ctrl",
                     Modifier::Shift => "shift",
-                    Modifier::Fn => "fn"
-                }.to_string();
+                    Modifier::Fn => "fn",
+                }
+                .to_string();
                 mods.insert(key, data.to_json());
             }
             d.insert("mods".to_string(), Value::Object(mods));
@@ -238,9 +246,9 @@ impl<'a> Icon<'a> {
     /// Serializes the `Icon` into its JSON representation.
     pub fn to_json(&self) -> Value {
         match *self {
-            Icon::Path(ref s) => json!({"path": s}),
+            Icon::Path(ref s) => json!({ "path": s }),
             Icon::File(ref s) => json!({"type": "fileicon", "path": s}),
-            Icon::FileType(ref s) => json!({"type": "filetype", "path": s})
+            Icon::FileType(ref s) => json!({"type": "filetype", "path": s}),
         }
     }
 }
@@ -277,91 +285,101 @@ fn test_to_json() {
     let item = Item::new("Item 1");
     assert_eq!(item.to_json(), json!({"title": "Item 1"}));
     let item = ::ItemBuilder::new("Item 2")
-                              .subtitle("Subtitle")
-                              .into_item();
-    assert_eq!(item.to_json(),
-              json!({
-                  "title": "Item 2",
-                  "subtitle": "Subtitle"
-              }));
+        .subtitle("Subtitle")
+        .into_item();
+    assert_eq!(
+        item.to_json(),
+        json!({
+            "title": "Item 2",
+            "subtitle": "Subtitle"
+        })
+    );
     let item = ::ItemBuilder::new("Item 3")
-                              .arg("Argument")
-                              .subtitle("Subtitle")
-                              .icon_filetype("public.folder")
-                              .into_item();
-    assert_eq!(item.to_json(),
-               json!({
-                   "title": "Item 3",
-                   "subtitle": "Subtitle",
-                   "arg": "Argument",
-                   "icon": { "type": "filetype", "path": "public.folder" }
-               }));
+        .arg("Argument")
+        .subtitle("Subtitle")
+        .icon_filetype("public.folder")
+        .into_item();
+    assert_eq!(
+        item.to_json(),
+        json!({
+            "title": "Item 3",
+            "subtitle": "Subtitle",
+            "arg": "Argument",
+            "icon": { "type": "filetype", "path": "public.folder" }
+        })
+    );
     let item = ::ItemBuilder::new("Item 4")
-                              .arg("Argument")
-                              .subtitle("Subtitle")
-                              .arg_mod(Modifier::Option, "Alt Argument")
-                              .valid_mod(Modifier::Option, false)
-                              .icon_file_mod(Modifier::Option, "opt.png")
-                              .arg_mod(Modifier::Control, "Ctrl Argument")
-                              .subtitle_mod(Modifier::Control, "Ctrl Subtitle")
-                              .icon_path_mod(Modifier::Control, "ctrl.png")
-                              .arg_mod(Modifier::Shift, "Shift Argument")
-                              .into_item();
-    assert_eq!(item.to_json(),
-               json!({
-                   "title": "Item 4",
-                   "subtitle": "Subtitle",
-                   "arg": "Argument",
-                   "mods": {
-                       "alt": {
-                            "arg": "Alt Argument",
-                            "valid": false,
-                            "icon": { "type": "fileicon", "path": "opt.png" }
-                       },
-                       "ctrl": {
-                           "arg": "Ctrl Argument",
-                           "subtitle": "Ctrl Subtitle",
-                           "icon": { "path": "ctrl.png" }
-                       },
-                       "shift": {
-                           "arg": "Shift Argument"
-                       }
-                   }
-               }));
+        .arg("Argument")
+        .subtitle("Subtitle")
+        .arg_mod(Modifier::Option, "Alt Argument")
+        .valid_mod(Modifier::Option, false)
+        .icon_file_mod(Modifier::Option, "opt.png")
+        .arg_mod(Modifier::Control, "Ctrl Argument")
+        .subtitle_mod(Modifier::Control, "Ctrl Subtitle")
+        .icon_path_mod(Modifier::Control, "ctrl.png")
+        .arg_mod(Modifier::Shift, "Shift Argument")
+        .into_item();
+    assert_eq!(
+        item.to_json(),
+        json!({
+            "title": "Item 4",
+            "subtitle": "Subtitle",
+            "arg": "Argument",
+            "mods": {
+                "alt": {
+                     "arg": "Alt Argument",
+                     "valid": false,
+                     "icon": { "type": "fileicon", "path": "opt.png" }
+                },
+                "ctrl": {
+                    "arg": "Ctrl Argument",
+                    "subtitle": "Ctrl Subtitle",
+                    "icon": { "path": "ctrl.png" }
+                },
+                "shift": {
+                    "arg": "Shift Argument"
+                }
+            }
+        })
+    );
     let item = ::ItemBuilder::new("Item 5")
-                             .arg("Argument")
-                             .variable("fruit", "banana")
-                             .variable("vegetable", "carrot")
-                             .into_item();
-    assert_eq!(item.to_json(),
-               json!({
-                   "title": "Item 5",
-                   "arg": "Argument",
-                   "variables": {
-                       "fruit": "banana",
-                       "vegetable": "carrot"
-                   }
-               }));
+        .arg("Argument")
+        .variable("fruit", "banana")
+        .variable("vegetable", "carrot")
+        .into_item();
+    assert_eq!(
+        item.to_json(),
+        json!({
+            "title": "Item 5",
+            "arg": "Argument",
+            "variables": {
+                "fruit": "banana",
+                "vegetable": "carrot"
+            }
+        })
+    );
     let item = ::ItemBuilder::new("Item 6")
-                             .subtitle("Subtitle")
-                             .variable("fruit", "banana")
-                             .variable_mod(Modifier::Option, "vegetable", "carrot")
-                             .into_item();
-    assert_eq!(item.to_json(),
-               json!({
-                   "title": "Item 6",
-                   "subtitle": "Subtitle",
-                   "mods": {
-                       "alt": {
-                           "variables": {
-                               "vegetable": "carrot"
-                           }
-                       }
-                   },
-                   "variables": {
-                       "fruit": "banana"
-                   }
-               }));
+        .subtitle("Subtitle")
+        .variable("fruit", "banana")
+        .variable_mod(Modifier::Option, "vegetable", "carrot")
+        .into_item();
+    assert_eq!(
+        item.to_json(),
+        json!({
+            "title": "Item 6",
+            "subtitle": "Subtitle",
+            "mods": {
+                "alt": {
+                    "variables": {
+                        "vegetable": "carrot"
+                    }
+                }
+            },
+            "variables": {
+                "fruit": "banana"
+            }
+        })
+    );
 }
 
 #[test]
@@ -369,36 +387,39 @@ fn test_builder() {
     let json = Builder::with_items(&[
         Item::new("Item 1"),
         ::ItemBuilder::new("Item 2")
-                      .subtitle("Subtitle")
-                      .into_item(),
+            .subtitle("Subtitle")
+            .into_item(),
         ::ItemBuilder::new("Item 3")
-                      .arg("Argument")
-                      .subtitle("Subtitle")
-                      .icon_filetype("public.folder")
-                      .into_item()
-    ]).variable("fruit", "banana")
-      .variable("vegetable", "carrot")
-      .into_json();
-    assert_eq!(json,
-               json!({
-                   "items": [
-                       {
-                           "title": "Item 1"
-                       },
-                       {
-                           "title": "Item 2",
-                           "subtitle": "Subtitle"
-                       },
-                       {
-                           "title": "Item 3",
-                           "arg": "Argument",
-                           "subtitle": "Subtitle",
-                           "icon": { "type": "filetype", "path": "public.folder" }
-                       }
-                   ],
-                   "variables": {
-                       "fruit": "banana",
-                       "vegetable": "carrot"
-                   }
-               }));
+            .arg("Argument")
+            .subtitle("Subtitle")
+            .icon_filetype("public.folder")
+            .into_item(),
+    ])
+    .variable("fruit", "banana")
+    .variable("vegetable", "carrot")
+    .into_json();
+    assert_eq!(
+        json,
+        json!({
+            "items": [
+                {
+                    "title": "Item 1"
+                },
+                {
+                    "title": "Item 2",
+                    "subtitle": "Subtitle"
+                },
+                {
+                    "title": "Item 3",
+                    "arg": "Argument",
+                    "subtitle": "Subtitle",
+                    "icon": { "type": "filetype", "path": "public.folder" }
+                }
+            ],
+            "variables": {
+                "fruit": "banana",
+                "vegetable": "carrot"
+            }
+        })
+    );
 }

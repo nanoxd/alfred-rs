@@ -115,25 +115,24 @@
 //! ```
 
 #![warn(missing_docs)]
-
 #![doc(html_root_url = "https://docs.rs/alfred/4.0.2")]
 
 #[macro_use]
 extern crate serde_json;
 
+pub mod env;
 pub mod json;
 pub mod xml;
-pub mod env;
 
 use std::borrow::{Borrow, Cow};
 use std::collections::HashMap;
-use std::iter::FromIterator;
 use std::hash::Hash;
+use std::iter::FromIterator;
 
 pub use self::xml::XMLWriter;
 
 /// Representation of a script filter item.
-#[derive(Clone,Debug,PartialEq,Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Item<'a> {
     /// Title for the item.
     pub title: Cow<'a, str>,
@@ -191,7 +190,7 @@ pub struct Item<'a> {
     pub variables: HashMap<Cow<'a, str>, Cow<'a, str>>,
 
     /// Disallow struct literals for `Item`.
-    _priv: ()
+    _priv: (),
 }
 
 impl<'a> Item<'a> {
@@ -211,22 +210,22 @@ impl<'a> Item<'a> {
             quicklook_url: None,
             modifiers: HashMap::new(),
             variables: HashMap::new(),
-            _priv: ()
+            _priv: (),
         }
     }
 }
 
 /// Helper for building `Item` values.
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct ItemBuilder<'a> {
-    item: Item<'a>
+    item: Item<'a>,
 }
 
 impl<'a> ItemBuilder<'a> {
     /// Returns a new `ItemBuilder` with the given title.
     pub fn new<S: Into<Cow<'a, str>>>(title: S) -> ItemBuilder<'a> {
         ItemBuilder {
-            item: Item::new(title)
+            item: Item::new(title),
         }
     }
 
@@ -255,8 +254,11 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the `subtitle` to the given value with the given modifier.
     ///
     /// This sets the subtitle to use when the given modifier is pressed.
-    pub fn subtitle_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, subtitle: S)
-                                              -> ItemBuilder<'a> {
+    pub fn subtitle_mod<S: Into<Cow<'a, str>>>(
+        mut self,
+        modifier: Modifier,
+        subtitle: S,
+    ) -> ItemBuilder<'a> {
         self.set_subtitle_mod(modifier, subtitle);
         self
     }
@@ -293,8 +295,11 @@ impl<'a> ItemBuilder<'a> {
     /// per-modifier icons.
     ///
     /// This property is only used with Alfred 3.4.1 or later.
-    pub fn icon_path_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, path: S)
-                                               -> ItemBuilder<'a> {
+    pub fn icon_path_mod<S: Into<Cow<'a, str>>>(
+        mut self,
+        modifier: Modifier,
+        path: S,
+    ) -> ItemBuilder<'a> {
         self.set_icon_path_mod(modifier, path);
         self
     }
@@ -307,8 +312,11 @@ impl<'a> ItemBuilder<'a> {
     /// per-modifier icons.
     ///
     /// This property is only used with Alfred 3.4.1 or later.
-    pub fn icon_file_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, path: S)
-                                               -> ItemBuilder<'a> {
+    pub fn icon_file_mod<S: Into<Cow<'a, str>>>(
+        mut self,
+        modifier: Modifier,
+        path: S,
+    ) -> ItemBuilder<'a> {
         self.set_icon_file_mod(modifier, path);
         self
     }
@@ -321,8 +329,11 @@ impl<'a> ItemBuilder<'a> {
     /// per-modifier icons.
     ///
     /// This property is only used with Alfred 3.4.1 or later.
-    pub fn icon_filetype_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, filetype: S)
-                                                   -> ItemBuilder<'a> {
+    pub fn icon_filetype_mod<S: Into<Cow<'a, str>>>(
+        mut self,
+        modifier: Modifier,
+        filetype: S,
+    ) -> ItemBuilder<'a> {
         self.set_icon_filetype_mod(modifier, filetype);
         self
     }
@@ -342,8 +353,7 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the `arg` to the given value with the given modifier.
     ///
     /// This sets the arg to use when the given modifier is pressed.
-    pub fn arg_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, arg: S)
-                                         -> ItemBuilder<'a> {
+    pub fn arg_mod<S: Into<Cow<'a, str>>>(mut self, modifier: Modifier, arg: S) -> ItemBuilder<'a> {
         self.set_arg_mod(modifier, arg);
         self
     }
@@ -369,13 +379,14 @@ impl<'a> ItemBuilder<'a> {
     }
 
     /// Sets the subtitle, arg, validity, and icon to use with the given modifier.
-    pub fn modifier<S: Into<Cow<'a, str>>, S2: Into<Cow<'a, str>>>(mut self,
-                                                                   modifier: Modifier,
-                                                                   subtitle: Option<S>,
-                                                                   arg: Option<S2>,
-                                                                   valid: bool,
-                                                                   icon: Option<Icon<'a>>)
-                                                                  -> ItemBuilder<'a> {
+    pub fn modifier<S: Into<Cow<'a, str>>, S2: Into<Cow<'a, str>>>(
+        mut self,
+        modifier: Modifier,
+        subtitle: Option<S>,
+        arg: Option<S2>,
+        valid: bool,
+        icon: Option<Icon<'a>>,
+    ) -> ItemBuilder<'a> {
         self.set_modifier(modifier, subtitle, arg, valid, icon);
         self
     }
@@ -407,9 +418,10 @@ impl<'a> ItemBuilder<'a> {
     /// Inserts a key/value pair into the item variables.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn variable<K,V>(mut self, key: K, value: V) -> ItemBuilder<'a>
-        where K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn variable<K, V>(mut self, key: K, value: V) -> ItemBuilder<'a>
+    where
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.set_variable(key, value);
         self
@@ -418,10 +430,11 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the item's variables to `variables`.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn variables<I,K,V>(mut self, variables: I) -> ItemBuilder<'a>
-        where I: IntoIterator<Item=(K,V)>,
-              K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn variables<I, K, V>(mut self, variables: I) -> ItemBuilder<'a>
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.set_variables(variables);
         self
@@ -430,9 +443,10 @@ impl<'a> ItemBuilder<'a> {
     /// Inserts a key/value pair into the variables for the given modifier.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn variable_mod<K,V>(mut self, modifier: Modifier, key: K, value: V) -> ItemBuilder<'a>
-        where K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn variable_mod<K, V>(mut self, modifier: Modifier, key: K, value: V) -> ItemBuilder<'a>
+    where
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.set_variable_mod(modifier, key, value);
         self
@@ -441,10 +455,11 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the variables to `variables` for the given modifier.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn variables_mod<I,K,V>(mut self, modifier: Modifier, variables: I) -> ItemBuilder<'a>
-        where I: IntoIterator<Item=(K,V)>,
-              K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn variables_mod<I, K, V>(mut self, modifier: Modifier, variables: I) -> ItemBuilder<'a>
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.set_variables_mod(modifier, variables);
         self
@@ -553,8 +568,11 @@ impl<'a> ItemBuilder<'a> {
     /// per-modifier icons.
     ///
     /// This property is only used with Alfred 3.4.1 or later.
-    pub fn set_icon_filetype_mod<S: Into<Cow<'a, str>>>(&mut self, modifier: Modifier,
-                                                        filetype: S) {
+    pub fn set_icon_filetype_mod<S: Into<Cow<'a, str>>>(
+        &mut self,
+        modifier: Modifier,
+        filetype: S,
+    ) {
         self.data_for_modifier(modifier).icon = Some(Icon::FileType(filetype.into()));
     }
 
@@ -680,19 +698,21 @@ impl<'a> ItemBuilder<'a> {
     }
 
     /// Sets subtitle, arg, validity, and icon for the given modifier.
-    pub fn set_modifier<S: Into<Cow<'a, str>>, S2: Into<Cow<'a, str>>>(&mut self,
-                                                                       modifier: Modifier,
-                                                                       subtitle: Option<S>,
-                                                                       arg: Option<S2>,
-                                                                       valid: bool,
-                                                                       icon: Option<Icon<'a>>) {
+    pub fn set_modifier<S: Into<Cow<'a, str>>, S2: Into<Cow<'a, str>>>(
+        &mut self,
+        modifier: Modifier,
+        subtitle: Option<S>,
+        arg: Option<S2>,
+        valid: bool,
+        icon: Option<Icon<'a>>,
+    ) {
         let data = ModifierData {
             subtitle: subtitle.map(Into::into),
             arg: arg.map(Into::into),
             valid: Some(valid),
             icon: icon,
             variables: HashMap::new(),
-            _priv: ()
+            _priv: (),
         };
         self.item.modifiers.insert(modifier, data);
     }
@@ -735,9 +755,10 @@ impl<'a> ItemBuilder<'a> {
     /// Inserts a key/value pair into the item variables.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn set_variable<K,V>(&mut self, key: K, value: V)
-        where K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn set_variable<K, V>(&mut self, key: K, value: V)
+    where
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.item.variables.insert(key.into(), value.into());
     }
@@ -746,8 +767,9 @@ impl<'a> ItemBuilder<'a> {
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
     pub fn unset_variable<K: ?Sized>(&mut self, key: &K)
-        where Cow<'a, str>: Borrow<K>,
-              K: Hash + Eq
+    where
+        Cow<'a, str>: Borrow<K>,
+        K: Hash + Eq,
     {
         self.item.variables.remove(key);
     }
@@ -755,13 +777,14 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the item's variables to `variables`.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn set_variables<I,K,V>(&mut self, variables: I)
-        where I: IntoIterator<Item=(K,V)>,
-              K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn set_variables<I, K, V>(&mut self, variables: I)
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
-        self.item.variables = HashMap::from_iter(variables.into_iter()
-                                                          .map(|(k,v)| (k.into(),v.into())));
+        self.item.variables =
+            HashMap::from_iter(variables.into_iter().map(|(k, v)| (k.into(), v.into())));
     }
 
     /// Removes all item variables.
@@ -776,19 +799,23 @@ impl<'a> ItemBuilder<'a> {
     /// Inserts a key/value pair into the variables for the given modifier.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn set_variable_mod<K,V>(&mut self, modifier: Modifier, key: K, value: V)
-        where K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn set_variable_mod<K, V>(&mut self, modifier: Modifier, key: K, value: V)
+    where
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
-        self.data_for_modifier(modifier).variables.insert(key.into(), value.into());
+        self.data_for_modifier(modifier)
+            .variables
+            .insert(key.into(), value.into());
     }
 
     /// Removes a key from the variables for the given modifier.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
     pub fn unset_variable_mod<K: ?Sized>(&mut self, modifier: Modifier, key: &K)
-        where Cow<'a, str>: Borrow<K>,
-              K: Hash + Eq
+    where
+        Cow<'a, str>: Borrow<K>,
+        K: Hash + Eq,
     {
         use std::collections::hash_map::Entry;
         if let Entry::Occupied(mut entry) = self.item.modifiers.entry(modifier) {
@@ -802,13 +829,14 @@ impl<'a> ItemBuilder<'a> {
     /// Sets the variables to `variables` for the given modifier.
     ///
     /// Item variables are only used with JSON output and only affect Alfred 3.4.1 or later.
-    pub fn set_variables_mod<I,K,V>(&mut self, modifier: Modifier, variables: I)
-        where I: IntoIterator<Item=(K,V)>,
-              K: Into<Cow<'a, str>>,
-              V: Into<Cow<'a, str>>
+    pub fn set_variables_mod<I, K, V>(&mut self, modifier: Modifier, variables: I)
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         self.data_for_modifier(modifier).variables =
-            HashMap::from_iter(variables.into_iter().map(|(k,v)| (k.into(), v.into())));
+            HashMap::from_iter(variables.into_iter().map(|(k, v)| (k.into(), v.into())));
     }
 
     /// Removes all variables for the given modifier.
@@ -835,13 +863,16 @@ impl<'a> ItemBuilder<'a> {
     }
 
     fn data_for_modifier(&mut self, modifier: Modifier) -> &mut ModifierData<'a> {
-        self.item.modifiers.entry(modifier).or_insert_with(Default::default)
+        self.item
+            .modifiers
+            .entry(modifier)
+            .or_insert_with(Default::default)
     }
 }
 
 /// Keyboard modifiers.
 // As far as I can tell, Alfred doesn't support modifier combinations.
-#[derive(Copy,Clone,Debug,PartialEq,Eq,Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Modifier {
     /// Command key
     Command,
@@ -852,14 +883,19 @@ pub enum Modifier {
     /// Shift key
     Shift,
     /// Fn key
-    Fn
+    Fn,
 }
 
-const ALL_MODIFIERS: &'static [Modifier] = &[Modifier::Command, Modifier::Option,
-                                             Modifier::Control, Modifier::Shift, Modifier::Fn];
+const ALL_MODIFIERS: &'static [Modifier] = &[
+    Modifier::Command,
+    Modifier::Option,
+    Modifier::Control,
+    Modifier::Shift,
+    Modifier::Fn,
+];
 
 /// Optional overrides of subtitle, arg, and valid for modifiers.
-#[derive(Clone,Debug,PartialEq,Eq,Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct ModifierData<'a> {
     /// The subtitle to use for the current modifier.
     pub subtitle: Option<Cow<'a, str>>,
@@ -882,7 +918,7 @@ pub struct ModifierData<'a> {
     pub variables: HashMap<Cow<'a, str>, Cow<'a, str>>,
 
     /// Disallow struct literals for `ModifierData`.
-    _priv: ()
+    _priv: (),
 }
 
 impl<'a> ModifierData<'a> {
@@ -893,26 +929,26 @@ impl<'a> ModifierData<'a> {
 
     fn is_empty(&self) -> bool {
         self.subtitle.is_none()
-        && self.arg.is_none()
-        && self.valid.is_none()
-        && self.icon.is_none()
-        && self.variables.is_empty()
+            && self.arg.is_none()
+            && self.valid.is_none()
+            && self.icon.is_none()
+            && self.variables.is_empty()
     }
 }
 
 /// Item icons
-#[derive(Clone,Debug,PartialEq,Eq,Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Icon<'a> {
     /// Path to an image file on disk relative to the workflow directory.
     Path(Cow<'a, str>),
     /// Path to a file whose icon will be used.
     File(Cow<'a, str>),
     /// UTI for a file type to use (e.g. public.folder).
-    FileType(Cow<'a, str>)
+    FileType(Cow<'a, str>),
 }
 
 /// Item types
-#[derive(Copy,Clone,Debug,PartialEq,Eq,Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum ItemType {
     /// Default type for an item.
     Default,
@@ -924,7 +960,7 @@ pub enum ItemType {
     /// Type representing a file, with filesystem checks skipped.
     ///
     /// Similar to `File` but skips the check to ensure the file exists.
-    FileSkipCheck
+    FileSkipCheck,
 }
 
 #[test]
@@ -935,8 +971,14 @@ fn test_variables() {
     builder.set_variable("fruit", "banana");
     builder.set_variable("vegetable".to_owned(), Cow::Borrowed("carrot"));
     let item = builder.clone().into_item();
-    assert_eq!(item.variables.get("fruit").as_ref().map(|x| x.as_ref()), Some("banana"));
-    assert_eq!(item.variables.get("vegetable").as_ref().map(|x| x.as_ref()), Some("carrot"));
+    assert_eq!(
+        item.variables.get("fruit").as_ref().map(|x| x.as_ref()),
+        Some("banana")
+    );
+    assert_eq!(
+        item.variables.get("vegetable").as_ref().map(|x| x.as_ref()),
+        Some("carrot")
+    );
     assert_eq!(item.variables.get("meat"), None);
     builder.unset_variable("fruit");
     builder.unset_variable("vegetable");

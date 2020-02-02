@@ -49,7 +49,7 @@ use std::io::prelude::*;
 use std::mem;
 use std::sync;
 
-use ::{Item, ItemType, Modifier, Icon};
+use {Icon, Item, ItemType, Modifier};
 
 /// Helper struct used to manage the XML serialization of `Item`s.
 ///
@@ -63,18 +63,18 @@ pub struct XMLWriter<W: Write> {
     // Option so close() can remove it
     // Otherwise this must always be Some()
     w: Option<W>,
-    last_err: Option<SavedError>
+    last_err: Option<SavedError>,
 }
 
 // FIXME: If io::Error gains Clone again, go back to just cloning it
 enum SavedError {
     Os(i32),
-    Custom(SharedError)
+    Custom(SharedError),
 }
 
 #[derive(Clone)]
 struct SharedError {
-    error: sync::Arc<io::Error>
+    error: sync::Arc<io::Error>,
 }
 
 impl From<io::Error> for SavedError {
@@ -82,7 +82,9 @@ impl From<io::Error> for SavedError {
         if let Some(code) = err.raw_os_error() {
             SavedError::Os(code)
         } else {
-            SavedError::Custom(SharedError { error: sync::Arc::new(err) })
+            SavedError::Custom(SharedError {
+                error: sync::Arc::new(err),
+            })
         }
     }
 }
@@ -127,13 +129,11 @@ impl<W: Write> XMLWriter<W> {
     /// The XML header is written immediately.
     pub fn new(mut w: W) -> io::Result<XMLWriter<W>> {
         match w.write_all(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<items>\n") {
-            Ok(()) => {
-                Ok(XMLWriter {
-                    w: Some(w),
-                    last_err: None
-                })
-            }
-            Err(err) => Err(err)
+            Ok(()) => Ok(XMLWriter {
+                w: Some(w),
+                last_err: None,
+            }),
+            Err(err) => Err(err),
         }
     }
 
@@ -155,7 +155,7 @@ impl<W: Write> XMLWriter<W> {
                 self.last_err = Some(err);
                 Err(io_err)
             }
-            x@Ok(_) => x
+            x @ Ok(_) => x,
         }
     }
 
@@ -248,69 +248,111 @@ impl<'a> Item<'a> {
             try!(w.write_all(br#" valid="no""#));
         }
         if let Some(ref auto) = self.autocomplete {
-            try!(write!(&mut w, r#" autocomplete="{}""#, encode_entities(auto)));
+            try!(write!(
+                &mut w,
+                r#" autocomplete="{}""#,
+                encode_entities(auto)
+            ));
         }
         try!(w.write_all(b">\n"));
 
-        try!(write_indent(&mut w, indent+1));
-        try!(write!(&mut w, "<title>{}</title>\n", encode_entities(&self.title)));
+        try!(write_indent(&mut w, indent + 1));
+        try!(write!(
+            &mut w,
+            "<title>{}</title>\n",
+            encode_entities(&self.title)
+        ));
 
         if let Some(ref subtitle) = self.subtitle {
-            try!(write_indent(&mut w, indent+1));
-            try!(write!(&mut w, "<subtitle>{}</subtitle>\n", encode_entities(subtitle)));
+            try!(write_indent(&mut w, indent + 1));
+            try!(write!(
+                &mut w,
+                "<subtitle>{}</subtitle>\n",
+                encode_entities(subtitle)
+            ));
         }
 
         if let Some(ref icon) = self.icon {
-            try!(write_indent(&mut w, indent+1));
+            try!(write_indent(&mut w, indent + 1));
             match *icon {
                 Icon::Path(ref s) => {
                     try!(write!(&mut w, "<icon>{}</icon>\n", encode_entities(s)));
                 }
                 Icon::File(ref s) => {
-                    try!(write!(&mut w, "<icon type=\"fileicon\">{}</icon>\n",
-                                    encode_entities(s)));
+                    try!(write!(
+                        &mut w,
+                        "<icon type=\"fileicon\">{}</icon>\n",
+                        encode_entities(s)
+                    ));
                 }
                 Icon::FileType(ref s) => {
-                    try!(write!(&mut w, "<icon type=\"filetype\">{}</icon>\n",
-                                    encode_entities(s)));
+                    try!(write!(
+                        &mut w,
+                        "<icon type=\"filetype\">{}</icon>\n",
+                        encode_entities(s)
+                    ));
                 }
             }
         }
 
         for (modifier, data) in &self.modifiers {
-            try!(write_indent(&mut w, indent+1));
-            try!(write!(&mut w, r#"<mod key="{}""#, match *modifier {
-                Modifier::Command => "cmd",
-                Modifier::Option => "alt",
-                Modifier::Control => "ctrl",
-                Modifier::Shift => "shift",
-                Modifier::Fn => "fn"
-            }));
+            try!(write_indent(&mut w, indent + 1));
+            try!(write!(
+                &mut w,
+                r#"<mod key="{}""#,
+                match *modifier {
+                    Modifier::Command => "cmd",
+                    Modifier::Option => "alt",
+                    Modifier::Control => "ctrl",
+                    Modifier::Shift => "shift",
+                    Modifier::Fn => "fn",
+                }
+            ));
             try!(w.write_all(b"<mod"));
             if let Some(ref subtitle) = data.subtitle {
-                try!(write!(&mut w, r#" subtitle="{}""#, encode_entities(subtitle)));
+                try!(write!(
+                    &mut w,
+                    r#" subtitle="{}""#,
+                    encode_entities(subtitle)
+                ));
             }
             if let Some(ref arg) = data.arg {
                 try!(write!(&mut w, r#" arg="{}""#, encode_entities(arg)));
             }
             if let Some(valid) = data.valid {
-                try!(write!(&mut w, r#" valid="{}""#, if valid { "yes" } else { "no" }));
+                try!(write!(
+                    &mut w,
+                    r#" valid="{}""#,
+                    if valid { "yes" } else { "no" }
+                ));
             }
             try!(w.write_all(b"/>\n"));
         }
 
         if let Some(ref text) = self.text_copy {
-            try!(write_indent(&mut w, indent+1));
-            try!(write!(&mut w, "<text type=\"copy\">{}</text>\n", encode_entities(text)));
+            try!(write_indent(&mut w, indent + 1));
+            try!(write!(
+                &mut w,
+                "<text type=\"copy\">{}</text>\n",
+                encode_entities(text)
+            ));
         }
         if let Some(ref text) = self.text_large_type {
-            try!(write_indent(&mut w, indent+1));
-            try!(write!(&mut w, "<text type=\"largetype\">{}</text>\n", encode_entities(text)));
+            try!(write_indent(&mut w, indent + 1));
+            try!(write!(
+                &mut w,
+                "<text type=\"largetype\">{}</text>\n",
+                encode_entities(text)
+            ));
         }
 
         if let Some(ref url) = self.quicklook_url {
-            try!(write_indent(&mut w, indent+1));
-            try!(write!(&mut w, "<quicklookurl>{}</quicklookurl>\n", encode_entities(url)));
+            try!(write_indent(&mut w, indent + 1));
+            try!(write!(
+                &mut w,
+                "<quicklookurl>{}</quicklookurl>\n",
+                encode_entities(url)
+            ));
         }
 
         try!(write_indent(&mut w, indent));
@@ -327,14 +369,11 @@ fn encode_entities(s: &str) -> Cow<str> {
             '>' => "&gt;",
             '"' => "&quot;",
             '&' => "&amp;",
-            '\0'...'\x08' |
-            '\x0B'...'\x0C' |
-            '\x0E'...'\x1F' |
-            '\u{FFFE}' | '\u{FFFF}' => {
+            '\0'...'\x08' | '\x0B'...'\x0C' | '\x0E'...'\x1F' | '\u{FFFE}' | '\u{FFFF}' => {
                 // these are all invalid characters in XML
                 "\u{FFFD}"
             }
-            _ => return None
+            _ => return None,
         })
     }
 
@@ -343,7 +382,7 @@ fn encode_entities(s: &str) -> Cow<str> {
         for c in s.chars() {
             match encode_entity(c) {
                 Some(ent) => res.push_str(ent),
-                None => res.push(c)
+                None => res.push(c),
             }
         }
         Cow::Owned(res)

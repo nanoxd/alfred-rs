@@ -17,12 +17,12 @@ pub fn preferences() -> Option<PathBuf> {
 ///
 /// Example output: `"/Users/Crayons/Dropbox/Alfred/Alfred.alfredpreferences/preferences/local/adbd4f66bc3ae8493832af61a41ee609b20d8705"`
 pub fn local_preferences() -> Option<PathBuf> {
-    match (preferences(),env::var("alfred_preferences_localhash")) {
-        (Some(mut prefs),Ok(hash)) => {
-            prefs.extend(["preferences","local",&hash].iter());
+    match (preferences(), env::var("alfred_preferences_localhash")) {
+        (Some(mut prefs), Ok(hash)) => {
+            prefs.extend(["preferences", "local", &hash].iter());
             Some(prefs)
         }
-        _ => None
+        _ => None,
     }
 }
 
@@ -51,7 +51,7 @@ pub fn theme_selection_background_str() -> Option<String> {
 }
 
 /// The subtext mode in the Appearance preferences.
-#[derive(Copy,Clone,Debug,PartialEq,Eq,Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Subtext {
     /// Always show subtext.
     Always,
@@ -60,17 +60,20 @@ pub enum Subtext {
     /// Only show subtext for the selected result.
     SelectedResult,
     /// Never show subtext.
-    Never
+    Never,
 }
 
 /// Returns the subtext mode the user has selected in the Appearance preferences.
 pub fn theme_subtext() -> Option<Subtext> {
-    match env::var("alfred_theme_subtext").as_ref().map(|s| s.as_ref()) {
+    match env::var("alfred_theme_subtext")
+        .as_ref()
+        .map(|s| s.as_ref())
+    {
         Ok("0") => Some(Subtext::Always),
         Ok("1") => Some(Subtext::AlternativeActions),
         Ok("2") => Some(Subtext::SelectedResult),
         Ok("3") => Some(Subtext::Never),
-        _ => None
+        _ => None,
     }
 }
 
@@ -85,7 +88,9 @@ pub fn version() -> Option<String> {
 ///
 /// Example output: `768`
 pub fn version_build() -> Option<i32> {
-    env::var("alfred_version_build").ok().and_then(|s| s.parse().ok())
+    env::var("alfred_version_build")
+        .ok()
+        .and_then(|s| s.parse().ok())
 }
 
 /// Returns the bundle ID of the current running workflow.
@@ -134,6 +139,6 @@ pub fn workflow_version() -> Option<String> {
 pub fn is_debug() -> bool {
     match env::var("alfred_debug") {
         Ok(val) => val == "1",
-        _ => false
+        _ => false,
     }
 }
