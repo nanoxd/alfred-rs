@@ -886,7 +886,7 @@ pub enum Modifier {
     Fn,
 }
 
-const ALL_MODIFIERS: &'static [Modifier] = &[
+const ALL_MODIFIERS: &[Modifier] = &[
     Modifier::Command,
     Modifier::Option,
     Modifier::Control,
