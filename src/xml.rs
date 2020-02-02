@@ -179,7 +179,7 @@ impl<W: Write> XMLWriter<W> {
         if let Some(err) = last_err {
             return Err(err.make_io_error());
         }
-        try!(write_footer(&mut w));
+        write_footer(&mut w)?;
         Ok(w)
     }
 }
@@ -204,11 +204,11 @@ impl<W: Write> Drop for XMLWriter<W> {
 ///
 /// The `Write` is flushed after the XML document is written.
 pub fn write_items<W: Write>(w: W, items: &[Item]) -> io::Result<()> {
-    let mut xmlw = try!(XMLWriter::new(w));
+    let mut xmlw = XMLWriter::new(w)?;
     for item in items.iter() {
-        try!(xmlw.write_item(item));
+        xmlw.write_item(item)?;
     }
-    let mut w = try!(xmlw.close());
+    let mut w = xmlw.close()?;
     w.flush()
 }
 
@@ -220,84 +220,76 @@ impl<'a> Item<'a> {
     pub fn write_xml(&self, w: &mut dyn Write, indent: u32) -> io::Result<()> {
         fn write_indent(w: &mut dyn Write, indent: u32) -> io::Result<()> {
             for _ in 0..indent {
-                try!(w.write_all(b"    "));
+                w.write_all(b"    ")?;
             }
             Ok(())
         }
 
         let mut w = io::BufWriter::with_capacity(512, w);
 
-        try!(write_indent(&mut w, indent));
-        try!(w.write_all(b"<item"));
+        write_indent(&mut w, indent)?;
+        w.write_all(b"<item")?;
         if let Some(ref uid) = self.uid {
-            try!(write!(&mut w, r#" uid="{}""#, encode_entities(uid)));
+            write!(&mut w, r#" uid="{}""#, encode_entities(uid))?;
         }
         if let Some(ref arg) = self.arg {
-            try!(write!(&mut w, r#" arg="{}""#, encode_entities(arg)));
+            write!(&mut w, r#" arg="{}""#, encode_entities(arg))?;
         }
         match self.type_ {
             ItemType::Default => {}
             ItemType::File => {
-                try!(w.write_all(br#" type="file""#));
+                w.write_all(br#" type="file""#)?;
             }
             ItemType::FileSkipCheck => {
-                try!(w.write_all(br#" type="file:skipcheck""#));
+                w.write_all(br#" type="file:skipcheck""#)?;
             }
         }
         if !self.valid {
-            try!(w.write_all(br#" valid="no""#));
+            w.write_all(br#" valid="no""#)?;
         }
         if let Some(ref auto) = self.autocomplete {
-            try!(write!(
-                &mut w,
-                r#" autocomplete="{}""#,
-                encode_entities(auto)
-            ));
+            write!(&mut w, r#" autocomplete="{}""#, encode_entities(auto))?;
         }
-        try!(w.write_all(b">\n"));
+        w.write_all(b">\n")?;
 
-        try!(write_indent(&mut w, indent + 1));
-        try!(write!(
-            &mut w,
-            "<title>{}</title>\n",
-            encode_entities(&self.title)
-        ));
+        write_indent(&mut w, indent + 1)?;
+        write!(&mut w, "<title>{}</title>\n", encode_entities(&self.title))?;
 
         if let Some(ref subtitle) = self.subtitle {
-            try!(write_indent(&mut w, indent + 1));
-            try!(write!(
+            write_indent(&mut w, indent + 1)?;
+            write!(
                 &mut w,
                 "<subtitle>{}</subtitle>\n",
                 encode_entities(subtitle)
-            ));
+            )?;
         }
 
         if let Some(ref icon) = self.icon {
-            try!(write_indent(&mut w, indent + 1));
+            write_indent(&mut w, indent + 1)?;
             match *icon {
                 Icon::Path(ref s) => {
-                    try!(write!(&mut w, "<icon>{}</icon>\n", encode_entities(s)));
+                    write!(&mut w, "<icon>{}</icon>\n", encode_entities(s))?;
                 }
                 Icon::File(ref s) => {
-                    try!(write!(
+                    write!(
                         &mut w,
                         "<icon type=\"fileicon\">{}</icon>\n",
                         encode_entities(s)
-                    ));
+                    )?;
                 }
                 Icon::FileType(ref s) => {
-                    try!(write!(
+                    write!(
                         &mut w,
                         "<icon type=\"filetype\">{}</icon>\n",
                         encode_entities(s)
-                    ));
+                    )?;
                 }
             }
         }
 
         for (modifier, data) in &self.modifiers {
-            try!(write_indent(&mut w, indent + 1));
-            try!(write!(
+            write_indent(&mut w, indent + 1)?;
+            write!(
                 &mut w,
                 r#"<mod key="{}""#,
                 match *modifier {
@@ -307,56 +299,48 @@ impl<'a> Item<'a> {
                     Modifier::Shift => "shift",
                     Modifier::Fn => "fn",
                 }
-            ));
-            try!(w.write_all(b"<mod"));
+            )?;
+            w.write_all(b"<mod")?;
             if let Some(ref subtitle) = data.subtitle {
-                try!(write!(
-                    &mut w,
-                    r#" subtitle="{}""#,
-                    encode_entities(subtitle)
-                ));
+                write!(&mut w, r#" subtitle="{}""#, encode_entities(subtitle))?;
             }
             if let Some(ref arg) = data.arg {
-                try!(write!(&mut w, r#" arg="{}""#, encode_entities(arg)));
+                write!(&mut w, r#" arg="{}""#, encode_entities(arg))?;
             }
             if let Some(valid) = data.valid {
-                try!(write!(
-                    &mut w,
-                    r#" valid="{}""#,
-                    if valid { "yes" } else { "no" }
-                ));
+                write!(&mut w, r#" valid="{}""#, if valid { "yes" } else { "no" })?;
             }
-            try!(w.write_all(b"/>\n"));
+            w.write_all(b"/>\n")?;
         }
 
         if let Some(ref text) = self.text_copy {
-            try!(write_indent(&mut w, indent + 1));
-            try!(write!(
+            write_indent(&mut w, indent + 1)?;
+            write!(
                 &mut w,
                 "<text type=\"copy\">{}</text>\n",
                 encode_entities(text)
-            ));
+            )?;
         }
         if let Some(ref text) = self.text_large_type {
-            try!(write_indent(&mut w, indent + 1));
-            try!(write!(
+            write_indent(&mut w, indent + 1)?;
+            write!(
                 &mut w,
                 "<text type=\"largetype\">{}</text>\n",
                 encode_entities(text)
-            ));
+            )?;
         }
 
         if let Some(ref url) = self.quicklook_url {
-            try!(write_indent(&mut w, indent + 1));
-            try!(write!(
+            write_indent(&mut w, indent + 1)?;
+            write!(
                 &mut w,
                 "<quicklookurl>{}</quicklookurl>\n",
                 encode_entities(url)
-            ));
+            )?;
         }
 
-        try!(write_indent(&mut w, indent));
-        try!(w.write_all(b"</item>\n"));
+        write_indent(&mut w, indent)?;
+        w.write_all(b"</item>\n")?;
 
         w.flush()
     }
